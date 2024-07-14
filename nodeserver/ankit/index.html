@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LetsChat - Realtime Node Socket.io Chat App</title>
+    <style>
+       body {height: 100vh;
+            background-image: linear-gradient(rgb(158, 160, 180), rgb(214, 186, 214));}
+        h1 {margin-top: 12px;
+            font-size: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;}
+        .container {
+            max-width: 955px;
+            border: 2px solid black;
+            margin: auto;
+            height: 60vh;
+            padding: 33px;
+            overflow-y: auto;
+            margin-bottom: 23px;
+            border-radius: 12px;}
+          .message{
+            background-color: grey;
+            width: 24%;
+            padding: 10px;
+            margin: 17px 12px;
+            border: 2px solid black;
+            border-radius: 10px;}
+           .left {
+            float: left;
+            clear: both;}
+            .right{
+            float: right;
+            clear: both;}
+            #send-container{
+            display: block;
+            margin: auto;
+            text-align: center;
+            max-width: 1064px;
+            width: 100%;}
+         #messageInp {
+            width: 91%;
+            border: 2px solid black;
+            border-radius: 6px;
+            height: 34px;}
+            .btn {
+            border-radius: 6px;
+            border: 2px solid black;
+            background-color: grey;
+            height: 38px;}
+    </style>
+</head>
+<body>
+    <nav><h1>Welcome to LetsChat App</h1></nav>
+<div class="container"></div>
+<div class="send">
+        <form action="#" id="send-container">
+            <input type="text" name="messageInp" id="messageInp">
+            <button class="btn" type="submit" id="btn">Send</button>
+        </form>
+    </div>
+    <script src="http://localhost:8000/socket.io/socket.io.js" ></script>
+    <script>
+       const socket = io();
+        const form = document.getElementById('btn');
+        const input = document.getElementById('messageInp');
+        const messageContainer = document.querySelector('.container')
+        
+        const appended = (message,possition) => {
+            const messageElement = document.createElement('div');
+            messageElement.innerText = message
+            messageElement.classList.add('message')
+            messageElement.classList.add(possition)
+            messageContainer.append(messageElement)
+            if (possition == 'left') {
+                console.log('sound is playing');
+                }}
+        form.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (input.value) {
+                appended(`You:${input.value}`,'right')
+                socket.emit('send', input.value);
+                input.value = '';}});
+        const name = prompt("Enter the Name?")
+        socket.emit('new-user-join', name)
+        socket.on('user-joined', (name) => {
+            appended(`${name} joined the chat`, 'left')})
+
+        socket.on('recieve', (data) => {
+            const { name, message } = data;
+            appended(`${name}:${message}`, 'left');})
+        socket.on('leave', name => {
+            appended(`${name} left the chat`, 'left');})
+</script>
+</body>
+</html>
